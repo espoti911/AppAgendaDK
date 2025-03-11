@@ -23,11 +23,46 @@ import java.net.URL;
 
 public class DataUtil {
 
+    public static final String HOST_LOGIN = "http://192.168.100.22:8081";
     public static final String HOST = "http://localhost:8080";
+    public static final String PATH_API_LOGIN = "/api/";
     public static final String PATH_API = "/api/v1/";
-    
+
     private ObservableList<Provincia> olProvincias = FXCollections.observableArrayList();
     private ObservableList<Persona> olPersonas = FXCollections.observableArrayList();
+
+    public void login(String email, String password) throws Exception
+    {
+        System.out.println("Inciando sesion...");
+
+        HttpURLConnection httpURLConnection = (HttpURLConnection) new URL(HOST_LOGIN + PATH_API_LOGIN + "usuario/login?" + String.format("email=%s&pass=%s", email, password)).openConnection();
+        httpURLConnection.setRequestMethod("POST");
+        httpURLConnection.setDoOutput(true);
+
+        InputStream inputStream = httpURLConnection.getInputStream();
+        BufferedReader br1 = new BufferedReader(new InputStreamReader(inputStream));
+
+        System.out.println("Response Code:" + httpURLConnection.getResponseCode());
+        System.out.println("Response Message:" + httpURLConnection.getResponseMessage());
+
+        StringBuilder response = new StringBuilder();
+        String responseSingle = null;
+
+        while ((responseSingle = br1.readLine()) != null) {
+            response.append(responseSingle);
+        }
+
+        JsonReader jsonReader = Json.createReader(new StringReader(response.toString()));
+        JsonObject object = jsonReader.readObject();
+        jsonReader.close();
+
+        if (object.getInt("rpta") == 0)
+            throw new Exception("Usuario y/o contraseña incorrecto. Inténtelo con otro usuario");
+        else if (!object.getJsonObject("body").getBoolean("vigencia"))
+            throw new Exception("Usuario deshabilitado. Inténtelo con otro usuario");
+
+        System.out.println("Sesion iniciada");
+    }
 
     public void obtenerTodasProvincias() {
         System.out.println("Se están solicitando las provincias...");

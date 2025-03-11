@@ -7,7 +7,10 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 
@@ -19,8 +22,14 @@ public class InicioController {
     ObservableList<Persona> olPers;
     private Pane rootMain = new Pane();
 
-    @Deprecated
-    public void iniciaApp(Event event) {
+    @FXML
+    private Text textError;
+    @FXML
+    private TextField tfUser;
+    @FXML
+    private PasswordField tfPasswd;
+
+    private void iniciaApp(Event event) {
         try {
             System.out.println("Iniciando App");
             FXMLLoader
@@ -55,4 +64,19 @@ public class InicioController {
         this.olPers = olPers;
     }
 
+    @FXML
+    public void onLogin(Event actionEvent)
+    {
+        try
+        {
+            textError.setText("");
+            dataUtil.login(tfUser.getText(), tfPasswd.getText());
+            iniciaApp(actionEvent);
+        }
+        catch (Exception e)
+        {
+            tfPasswd.clear();
+            textError.setText(e.getMessage());
+        }
+    }
 }
