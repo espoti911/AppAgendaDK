@@ -35,10 +35,12 @@ public class DataUtil {
     {
         System.out.println("Inciando sesion...");
 
+        //Creacion de la request
         HttpURLConnection httpURLConnection = (HttpURLConnection) new URL(HOST_LOGIN + PATH_API_LOGIN + "usuario/login?" + String.format("email=%s&pass=%s", email, password)).openConnection();
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setDoOutput(true);
 
+        //Recoleccion de la respuesta
         InputStream inputStream = httpURLConnection.getInputStream();
         BufferedReader br1 = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -48,19 +50,24 @@ public class DataUtil {
         StringBuilder response = new StringBuilder();
         String responseSingle = null;
 
+        //String JSON
         while ((responseSingle = br1.readLine()) != null) {
             response.append(responseSingle);
         }
 
+        //Lector json
         JsonReader jsonReader = Json.createReader(new StringReader(response.toString()));
         JsonObject object = jsonReader.readObject();
         jsonReader.close();
 
+        //Si el campo rpta es 0 no existe el usuario
         if (object.getInt("rpta") == 0)
             throw new Exception("Usuario y/o contraseña incorrecto. Inténtelo con otro usuario");
+        //Si el campo vigencia del body es false es un usuario deshabilitado
         else if (!object.getJsonObject("body").getBoolean("vigencia"))
             throw new Exception("Usuario deshabilitado. Inténtelo con otro usuario");
 
+        //No hay errores
         System.out.println("Sesion iniciada");
     }
 
